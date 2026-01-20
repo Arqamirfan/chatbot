@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLP Chatbot - Learning Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-robot"></i> NLP Learning Chatbot</h1>
+            <p class="subtitle">A simple chatbot to demonstrate Natural Language Processing concepts</p>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2><i class="fas fa-comments"></i> Chat Window</h2>
+                <button id="trainBtn" class="btn-train">
+                    <i class="fas fa-brain"></i> Train Chatbot
+                </button>
+            </div>
+            
+            <div class="chat-box" id="chatBox">
+                <!-- Messages will appear here -->
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <strong>ChatBot:</strong> Hello! I'm a simple NLP chatbot. Ask me about courses, say hello, or just chat with me!
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="Type your message here..." autocomplete="off">
+                <button id="sendBtn"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+            
+            <div class="suggestions">
+                <p>Try asking:</p>
+                <div class="suggestion-buttons">
+                    <button class="suggestion-btn" data-message="Hello">Hello</button>
+                    <button class="suggestion-btn" data-message="What courses do you offer?">Courses</button>
+                    <button class="suggestion-btn" data-message="What is your name?">Your Name</button>
+                    <button class="suggestion-btn" data-message="Help me">Help</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-card">
+                <h3><i class="fas fa-lightbulb"></i> How It Works</h3>
+                <ul>
+                    <li><strong>Tokenization:</strong> Breaks sentences into words</li>
+                    <li><strong>Stemming:</strong> Reduces words to root form</li>
+                    <li><strong>Bag of Words:</strong> Converts text to numerical vectors</li>
+                    <li><strong>Pattern Matching:</strong> Finds similar questions</li>
+                </ul>
+            </div>
+            
+            <div class="info-card">
+                <h3><i class="fas fa-code"></i> NLP Concepts Demonstrated</h3>
+                <ul>
+                    <li>Text Preprocessing</li>
+                    <li>Intent Classification</li>
+                    <li>Pattern Recognition</li>
+                    <li>Response Generation</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>Educational Tool for NLP Learning | Built with Flask & NLTK</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatBox = document.getElementById('chatBox');
+            const userInput = document.getElementById('userInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const trainBtn = document.getElementById('trainBtn');
+            
+            // Send message on button click
+            sendBtn.addEventListener('click', sendMessage);
+            
+            // Send message on Enter key
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Suggestion buttons
+            document.querySelectorAll('.suggestion-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    userInput.value = this.getAttribute('data-message');
+                    sendMessage();
+                });
+            });
+            
+            // Train chatbot
+            trainBtn.addEventListener('click', function() {
+                trainBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Training...';
+                
+                fetch('/train', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    trainBtn.innerHTML = '<i class="fas fa-brain"></i> Train Chatbot';
+                    addMessage('System: ' + data.message, 'system');
+                })
+                .catch(error => {
+                    trainBtn.innerHTML = '<i class="fas fa-brain"></i> Train Chatbot';
+                    addMessage('Error: ' + error, 'system');
+                });
+            });
+            
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (message === '') return;
+                
+                // Add user message to chat
+                addMessage('You: ' + message, 'user');
+                userInput.value = '';
+                
+                // Send to backend
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addMessage('ChatBot: ' + data.response, 'bot');
+                })
+                .catch(error => {
+                    addMessage('Error: Could not connect to server', 'system');
+                });
+            }
+            
+            function addMessage(text, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}-message`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                contentDiv.innerHTML = text;
+                
+                messageDiv.appendChild(contentDiv);
+                chatBox.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
