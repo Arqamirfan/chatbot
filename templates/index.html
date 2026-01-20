@@ -3,74 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NLP Chatbot - Learning Tool</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>✅ Vercel Chatbot - Working</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #4f6df5 0%, #3a56d6 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        h1 { 
+            font-size: 2.5rem; 
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        .success-badge {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .chat-container {
+            padding: 30px;
+        }
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message {
+            background: #4f6df5;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        .bot-message {
+            background: #e8eaf6;
+            border-bottom-left-radius: 5px;
+        }
+        .system-message {
+            background: #ffebee;
+            color: #c62828;
+            margin: 10px auto;
+            text-align: center;
+            font-style: italic;
+            max-width: 90%;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #4f6df5;
+        }
+        button {
+            background: #4f6df5;
+            color: white;
+            border: none;
+            padding: 0 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        button:hover:not(:disabled) {
+            background: #3a56d6;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .suggestions {
+            background: #f5f7ff;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        .suggestions p {
+            margin-bottom: 10px;
+            color: #666;
+            font-weight: 500;
+        }
+        .suggestion-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .suggestion-btn {
+            background: white;
+            border: 2px solid #4f6df5;
+            color: #4f6df5;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .suggestion-btn:hover {
+            background: #4f6df5;
+            color: white;
+        }
+        footer {
+            background: #f5f7ff;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .status {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+        .connected { color: #4CAF50; }
+        .error { color: #f44336; }
+        
+        /* Scrollbar */
+        .chat-box::-webkit-scrollbar { width: 8px; }
+        .chat-box::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .chat-box::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
+        .chat-box::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { margin: 10px; border-radius: 15px; }
+            header { padding: 20px; }
+            h1 { font-size: 1.8rem; }
+            .chat-container { padding: 20px; }
+            .chat-box { height: 300px; }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-robot"></i> NLP Learning Chatbot</h1>
-            <p class="subtitle">A simple chatbot to demonstrate Natural Language Processing concepts</p>
+            <h1>🤖 ✅ Vercel Chatbot</h1>
+            <p class="subtitle">Successfully deployed on Vercel</p>
+            <div class="success-badge">✓ Working Perfectly</div>
         </header>
 
         <div class="chat-container">
-            <div class="chat-header">
-                <h2><i class="fas fa-comments"></i> Chat Window</h2>
-                <button id="trainBtn" class="btn-train">
-                    <i class="fas fa-brain"></i> Train Chatbot
-                </button>
+            <div class="status">
+                <span id="status" class="connected">● Connected to API</span>
             </div>
             
             <div class="chat-box" id="chatBox">
-                <!-- Messages will appear here -->
                 <div class="message bot-message">
-                    <div class="message-content">
-                        <strong>ChatBot:</strong> Hello! I'm a simple NLP chatbot. Ask me about courses, say hello, or just chat with me!
-                    </div>
+                    🎉 <strong>Success!</strong> This chatbot is now working on Vercel! Try chatting with me or use the suggestions below.
                 </div>
             </div>
             
             <div class="input-area">
                 <input type="text" id="userInput" placeholder="Type your message here..." autocomplete="off">
-                <button id="sendBtn"><i class="fas fa-paper-plane"></i> Send</button>
+                <button id="sendBtn">Send</button>
             </div>
             
             <div class="suggestions">
-                <p>Try asking:</p>
+                <p>Quick suggestions:</p>
                 <div class="suggestion-buttons">
-                    <button class="suggestion-btn" data-message="Hello">Hello</button>
-                    <button class="suggestion-btn" data-message="What courses do you offer?">Courses</button>
-                    <button class="suggestion-btn" data-message="What is your name?">Your Name</button>
-                    <button class="suggestion-btn" data-message="Help me">Help</button>
+                    <button class="suggestion-btn" data-msg="Hello">👋 Hello</button>
+                    <button class="suggestion-btn" data-msg="What is Vercel?">🚀 Vercel</button>
+                    <button class="suggestion-btn" data-msg="What is NLP?">🤖 NLP</button>
+                    <button class="suggestion-btn" data-msg="Who created you?">👨‍💻 Creator</button>
                 </div>
             </div>
         </div>
 
-        <div class="info-panel">
-            <div class="info-card">
-                <h3><i class="fas fa-lightbulb"></i> How It Works</h3>
-                <ul>
-                    <li><strong>Tokenization:</strong> Breaks sentences into words</li>
-                    <li><strong>Stemming:</strong> Reduces words to root form</li>
-                    <li><strong>Bag of Words:</strong> Converts text to numerical vectors</li>
-                    <li><strong>Pattern Matching:</strong> Finds similar questions</li>
-                </ul>
-            </div>
-            
-            <div class="info-card">
-                <h3><i class="fas fa-code"></i> NLP Concepts Demonstrated</h3>
-                <ul>
-                    <li>Text Preprocessing</li>
-                    <li>Intent Classification</li>
-                    <li>Pattern Recognition</li>
-                    <li>Response Generation</li>
-                </ul>
-            </div>
-        </div>
-
         <footer>
-            <p>Educational Tool for NLP Learning | Built with Flask & NLTK</p>
+            <p>✅ Successfully deployed on Vercel | 🐍 Pure Python | 🚀 No external dependencies</p>
         </footer>
     </div>
 
@@ -79,86 +231,87 @@
             const chatBox = document.getElementById('chatBox');
             const userInput = document.getElementById('userInput');
             const sendBtn = document.getElementById('sendBtn');
-            const trainBtn = document.getElementById('trainBtn');
+            const status = document.getElementById('status');
+            const baseUrl = window.location.origin;
             
-            // Send message on button click
+            // Check connection
+            checkConnection();
+            
+            // Event listeners
             sendBtn.addEventListener('click', sendMessage);
-            
-            // Send message on Enter key
-            userInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
+            userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
             });
             
             // Suggestion buttons
-            document.querySelectorAll('.suggestion-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    userInput.value = this.getAttribute('data-message');
+            document.querySelectorAll('.suggestion-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    userInput.value = this.getAttribute('data-msg');
                     sendMessage();
                 });
             });
             
-            // Train chatbot
-            trainBtn.addEventListener('click', function() {
-                trainBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Training...';
-                
-                fetch('/train', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
+            async function checkConnection() {
+                try {
+                    const res = await fetch(`${baseUrl}/health`);
+                    if (res.ok) {
+                        status.textContent = '● Connected to API';
+                        status.className = 'connected';
+                    } else {
+                        throw new Error('API error');
                     }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    trainBtn.innerHTML = '<i class="fas fa-brain"></i> Train Chatbot';
-                    addMessage('System: ' + data.message, 'system');
-                })
-                .catch(error => {
-                    trainBtn.innerHTML = '<i class="fas fa-brain"></i> Train Chatbot';
-                    addMessage('Error: ' + error, 'system');
-                });
-            });
-            
-            function sendMessage() {
-                const message = userInput.value.trim();
-                if (message === '') return;
-                
-                // Add user message to chat
-                addMessage('You: ' + message, 'user');
-                userInput.value = '';
-                
-                // Send to backend
-                fetch('/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: message })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    addMessage('ChatBot: ' + data.response, 'bot');
-                })
-                .catch(error => {
-                    addMessage('Error: Could not connect to server', 'system');
-                });
+                } catch (err) {
+                    status.textContent = '● Connection error';
+                    status.className = 'error';
+                    addMessage('⚠️ Could not connect to server. Please refresh.', 'system');
+                }
             }
             
-            function addMessage(text, sender) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${sender}-message`;
+            async function sendMessage() {
+                const msg = userInput.value.trim();
+                if (!msg) return;
                 
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'message-content';
-                contentDiv.innerHTML = text;
+                // Add user message
+                addMessage(`You: ${msg}`, 'user');
+                userInput.value = '';
+                userInput.disabled = true;
+                sendBtn.disabled = true;
+                sendBtn.textContent = '...';
                 
-                messageDiv.appendChild(contentDiv);
-                chatBox.appendChild(messageDiv);
-                
-                // Scroll to bottom
+                try {
+                    const res = await fetch(`${baseUrl}/api/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: msg })
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (data.status === 'success') {
+                        addMessage(`Bot: ${data.response}`, 'bot');
+                    } else {
+                        addMessage(`Error: ${data.response || data.error}`, 'system');
+                    }
+                } catch (err) {
+                    addMessage('Network error. Please try again.', 'system');
+                } finally {
+                    userInput.disabled = false;
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Send';
+                    userInput.focus();
+                }
+            }
+            
+            function addMessage(text, type) {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `message ${type}-message`;
+                msgDiv.textContent = text;
+                chatBox.appendChild(msgDiv);
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
+            
+            // Focus input
+            userInput.focus();
         });
     </script>
 </body>
